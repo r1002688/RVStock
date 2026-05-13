@@ -69,6 +69,7 @@ namespace RVStock
 
             try
             {
+                // Altijd scannen over alle categorieën, ongeacht de actieve filter
                 await StockService.ScanAsync(barcode, aantal);
                 ScanStatusText.Foreground = System.Windows.Media.Brushes.Green;
                 ScanStatusText.Text = $"✔  '{barcode}' × {aantal} uitgescand";
