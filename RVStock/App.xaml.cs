@@ -51,7 +51,7 @@ namespace RVStock
         {
             try
             {
-                // GithubSource is de correcte manier voor Velopack + GitHub Releases
+                // Repo is public, geen token nodig
                 var mgr = new Velopack.UpdateManager(
                     new Velopack.Sources.GithubSource("https://github.com/r1002688/RVStock", null, false));
 
