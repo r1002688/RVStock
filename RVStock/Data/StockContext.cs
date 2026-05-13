@@ -59,8 +59,9 @@ namespace RVStock.Data
 
             var kolommen = new[]
             {
-                ("Onderdelen", "Bestelnummer",  "TEXT NOT NULL DEFAULT ''"),
-                ("Onderdelen", "CategorieId",   "INTEGER NULL"),
+                ("Onderdelen",   "Bestelnummer", "TEXT NOT NULL DEFAULT ''"),
+                ("Onderdelen",   "CategorieId",  "INTEGER NULL"),
+                ("Leveranciers", "ElkeDag",      "INTEGER NOT NULL DEFAULT 0"),
             };
 
             foreach (var (tabel, kolom, type) in kolommen)

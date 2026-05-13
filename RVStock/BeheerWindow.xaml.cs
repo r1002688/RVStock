@@ -41,23 +41,27 @@ namespace RVStock
                 _geselecteerdeLeverancierId = l.Id;
                 LevNaamBox.Text = l.Naam;
                 LevEmailBox.Text = l.Email;
-                foreach (ComboBoxItem item in LevBesteldagBox.Items)
-                    if (int.Parse(item.Tag.ToString()!) == (int)l.BestelDag)
-                    { LevBesteldagBox.SelectedItem = item; break; }
+                LevElkeDagBox.IsChecked = l.ElkeDag;
+                if (!l.ElkeDag)
+                    foreach (ComboBoxItem item in LevBesteldagBox.Items)
+                        if (int.Parse(item.Tag.ToString()!) == (int)l.BestelDag)
+                        { LevBesteldagBox.SelectedItem = item; break; }
             }
         }
 
         private async void SaveLeverancier_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(LevNaamBox.Text) || LevBesteldagBox.SelectedItem == null) return;
-            var tagWaarde = int.Parse(((ComboBoxItem)LevBesteldagBox.SelectedItem).Tag.ToString()!);
-            var dag = (DayOfWeek)tagWaarde;
+            if (string.IsNullOrWhiteSpace(LevNaamBox.Text)) return;
+            bool elkeDag = LevElkeDagBox.IsChecked == true;
+            if (!elkeDag && LevBesteldagBox.SelectedItem == null) return;
+            var dag = elkeDag ? DayOfWeek.Monday : (DayOfWeek)int.Parse(((ComboBoxItem)LevBesteldagBox.SelectedItem!).Tag.ToString()!);
             var leverancier = new Leverancier
             {
                 Id = _geselecteerdeLeverancierId ?? 0,
                 Naam = LevNaamBox.Text.Trim(),
                 Email = LevEmailBox.Text.Trim(),
-                BestelDag = dag
+                BestelDag = dag,
+                ElkeDag = elkeDag
             };
             await StockService.SaveLeverancierAsync(leverancier);
             await LaadLeveranciersAsync();
@@ -81,8 +85,14 @@ namespace RVStock
         {
             _geselecteerdeLeverancierId = null;
             LevNaamBox.Clear(); LevEmailBox.Clear();
+            LevElkeDagBox.IsChecked = false;
             LevBesteldagBox.SelectedIndex = 0;
             LeveranciersGrid.SelectedItem = null;
+        }
+
+        private void LevElkeDagBox_Changed(object sender, RoutedEventArgs e)
+        {
+            // ComboBox wordt automatisch uitgeschakeld via de binding in XAML
         }
 
         // ===================== ONDERDELEN =====================

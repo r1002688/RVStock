@@ -1,6 +1,7 @@
 <Window x:Class="RVStock.BeheerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:RVStock.Converters"
         Title="RVStock - Beheer"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
@@ -83,7 +84,7 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="*"/>
                                     <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="220"/>
-                                    <DataGridTextColumn Header="Besteldag" Binding="{Binding BestelDag}" Width="120"/>
+                                    <DataGridTextColumn Header="Besteldag" Binding="{Binding BestelDagWeergave}" Width="120"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
@@ -104,8 +105,13 @@
                             <TextBox x:Name="LevEmailBox" Height="34" Padding="10 6" FontSize="13"
                                      BorderBrush="#BBDEFB" BorderThickness="2" Margin="0 0 0 12"/>
 
+                            <CheckBox x:Name="LevElkeDagBox" Content="Elke dag bestellen (geen vaste dag)"
+                                      FontSize="13" Margin="0 0 0 10"
+                                      Checked="LevElkeDagBox_Changed" Unchecked="LevElkeDagBox_Changed"/>
+
                             <TextBlock Text="Besteldag" FontSize="12" Foreground="#546E7A" Margin="0 0 0 4"/>
-                            <ComboBox x:Name="LevBesteldagBox" Height="34" FontSize="13" Margin="0 0 0 20">
+                            <ComboBox x:Name="LevBesteldagBox" Height="34" FontSize="13" Margin="0 0 0 20"
+                                      IsEnabled="{Binding ElementName=LevElkeDagBox, Path=IsChecked, Converter={x:Static local:InverseBoolConverter.Instance}}">
                                 <ComboBoxItem Content="Maandag" Tag="1"/>
                                 <ComboBoxItem Content="Dinsdag" Tag="2"/>
                                 <ComboBoxItem Content="Woensdag" Tag="3"/>
