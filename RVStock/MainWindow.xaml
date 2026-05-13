@@ -56,19 +56,50 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <!-- Rij 1: categorie filter -->
-                    <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+                    <!-- Rij 1: categorie filter + zoeken -->
+                    <Grid Margin="0 0 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         <TextBlock Text="📁  Categorie:" FontSize="13" FontWeight="SemiBold"
                                    VerticalAlignment="Center" Margin="0 0 10 0" Foreground="#546E7A"/>
-                        <ComboBox x:Name="CategorieFilterBox" Width="200" Height="32" FontSize="13"
+                        <ComboBox Grid.Column="1" x:Name="CategorieFilterBox" Width="200" Height="32" FontSize="13"
                                   DisplayMemberPath="Naam" SelectedValuePath="Id"
                                   SelectionChanged="CategorieFilterBox_SelectionChanged"/>
-                    </StackPanel>
+                        <TextBox Grid.Column="3" x:Name="ZoekBox" Width="280" Height="32" FontSize="13"
+                                 Padding="10 4" VerticalContentAlignment="Center"
+                                 BorderBrush="#BBDEFB" BorderThickness="2" Margin="16 0 0 0"
+                                 TextChanged="ZoekBox_TextChanged">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Style.Resources>
+                                        <VisualBrush x:Key="Hint" TileMode="None" Opacity="0.4" Stretch="None" AlignmentX="Left">
+                                            <VisualBrush.Visual>
+                                                <TextBlock Text="🔎  Zoek op naam of bestelnummer..." FontSize="13" Margin="10 0"/>
+                                            </VisualBrush.Visual>
+                                        </VisualBrush>
+                                    </Style.Resources>
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Background" Value="{StaticResource Hint}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <Button Grid.Column="4" Content="✖" Height="32" Width="32" Margin="4 0 0 0"
+                                Background="#E0E0E0" BorderThickness="0" FontSize="13" Cursor="Hand"
+                                Click="ZoekWissen_Click" ToolTip="Zoekopdracht wissen"/>
+                    </Grid>
                     <!-- Rij 2: scan -->
-                    <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <TextBlock Text="🔍  Scan barcode:" FontSize="14" FontWeight="SemiBold"
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="🔍  Barcode / bestelnr:" FontSize="14" FontWeight="SemiBold"
                                    VerticalAlignment="Center" Margin="0 0 12 0"/>
-                        <TextBox x:Name="BarcodeTextBox" Width="280" Height="36" FontSize="14"
+                        <TextBox x:Name="BarcodeTextBox" Width="260" Height="36" FontSize="14"
                                  Padding="10 6" VerticalContentAlignment="Center"
                                  BorderBrush="#BBDEFB" BorderThickness="2"
                                  KeyDown="BarcodeTextBox_KeyDown"/>
@@ -80,7 +111,8 @@
                         <Button Content="➖  Uitscannen" Height="36" Padding="14 0" Margin="10 0 0 0"
                                 Background="#E53935" Foreground="White" FontWeight="Bold"
                                 BorderThickness="0" Cursor="Hand"
-                                Click="UitscanButton_Click"/>
+                                Click="UitscanButton_Click"
+                                ToolTip="Scan via barcode/bestelnr, of selecteer een rij in de lijst"/>
                         <TextBlock x:Name="ScanStatusText" FontSize="13" VerticalAlignment="Center"
                                    Margin="14 0 0 0" Foreground="#4CAF50"/>
                     </StackPanel>

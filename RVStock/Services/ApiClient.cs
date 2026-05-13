@@ -26,9 +26,24 @@ namespace RVStock.Services
         public static async Task ScanAsync(string barcode, int aantalUitscannen = 1)
         {
             using var db = CreateContext();
-            var onderdeel = await db.Onderdelen.FirstOrDefaultAsync(o => o.Barcode == barcode)
-                ?? throw new Exception($"Geen onderdeel gevonden met barcode '{barcode}'.");
+            var onderdeel = await db.Onderdelen
+                .FirstOrDefaultAsync(o => o.Barcode == barcode || o.Bestelnummer == barcode)
+                ?? throw new Exception($"Geen onderdeel gevonden met barcode/bestelnummer '{barcode}'.");
 
+            await ScanOnderdeelAsync(db, onderdeel, aantalUitscannen);
+        }
+
+        public static async Task ScanByIdAsync(int id, int aantalUitscannen = 1)
+        {
+            using var db = CreateContext();
+            var onderdeel = await db.Onderdelen.FindAsync(id)
+                ?? throw new Exception("Onderdeel niet gevonden.");
+
+            await ScanOnderdeelAsync(db, onderdeel, aantalUitscannen);
+        }
+
+        private static async Task ScanOnderdeelAsync(StockContext db, Onderdeel onderdeel, int aantalUitscannen)
+        {
             onderdeel.Voorraad = Math.Max(0, onderdeel.Voorraad - aantalUitscannen);
 
             var bestellijn = await db.Bestelijnen
