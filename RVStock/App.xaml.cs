@@ -7,12 +7,11 @@ namespace RVStock
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Velopack moet als EERSTE worden aangeroepen vóór alles
             VelopackApp.Build().Run();
 
             base.OnStartup(e);
 
-            // Controleer op updates op de achtergrond (niet-blokkerend)
+            
             _ = CheckForUpdatesAsync();
         }
 
@@ -20,7 +19,7 @@ namespace RVStock
         {
             try
             {
-                // GitHub Releases update URL - past automatisch aan bij nieuwe releases
+               
                 var updateUrl = "https://github.com/r1002688/RVStock/releases/latest/download";
                 var mgr = new Velopack.UpdateManager(updateUrl);
 

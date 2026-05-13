@@ -28,20 +28,25 @@ namespace RVStock
                         var response = await _api.ScanAsync(barcode);
                         if (response.IsSuccessStatusCode)
                         {
+                            ScanStatusText.Foreground = System.Windows.Media.Brushes.Green;
+                            ScanStatusText.Text = $"✔  '{barcode}' uitgescand";
                             await LaadOnderdelenAsync();
                         }
                         else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                         {
-                            MessageBox.Show($"Geen onderdeel gevonden met barcode '{barcode}'.", "Niet gevonden", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            ScanStatusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
+                            ScanStatusText.Text = $"⚠  Barcode '{barcode}' niet gevonden";
                         }
                         else
                         {
-                            MessageBox.Show("Er is een fout opgetreden bij het scannen.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                            ScanStatusText.Foreground = System.Windows.Media.Brushes.Red;
+                            ScanStatusText.Text = "✖  Fout bij scannen";
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        MessageBox.Show($"Kan geen verbinding maken met de API.\n{ex.Message}", "Verbindingsfout", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ScanStatusText.Foreground = System.Windows.Media.Brushes.Red;
+                        ScanStatusText.Text = "✖  Geen verbinding met API";
                     }
 
                     BarcodeTextBox.Clear();
@@ -64,6 +69,7 @@ namespace RVStock
             {
                 var onderdelen = await _api.GetOnderdelenAsync();
                 ProductsGrid.ItemsSource = onderdelen;
+                AantalItemsText.Text = $"{onderdelen?.Count ?? 0} onderdelen";
             }
             catch
             {

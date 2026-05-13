@@ -111,6 +111,7 @@ namespace RVStock
             if (OnderdelenGrid.SelectedItem is Onderdeel o)
             {
                 _geselecteerdOnderdeelId = o.Id;
+                OndBestelnummerBox.Text = o.Bestelnummer;
                 OndNaamBox.Text = o.Naam;
                 OndBarcodeBox.Text = o.Barcode;
                 OndVoorraadBox.Text = o.Voorraad.ToString();
@@ -126,6 +127,7 @@ namespace RVStock
             var onderdeel = new Onderdeel
             {
                 Id = _geselecteerdOnderdeelId ?? 0,
+                Bestelnummer = OndBestelnummerBox.Text.Trim(),
                 Naam = OndNaamBox.Text.Trim(),
                 Barcode = OndBarcodeBox.Text.Trim(),
                 Voorraad = voorraad,
@@ -163,6 +165,7 @@ namespace RVStock
         private void ClearOnderdeelForm()
         {
             _geselecteerdOnderdeelId = null;
+            OndBestelnummerBox.Clear();
             OndNaamBox.Clear();
             OndBarcodeBox.Clear();
             OndVoorraadBox.Clear();
