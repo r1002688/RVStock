@@ -9,6 +9,11 @@ namespace RVStock
         public MainWindow()
         {
             InitializeComponent();
+
+            // Toon versienummer in de topbalk
+            var versie = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            VersieText.Text = $"v{versie?.Major}.{versie?.Minor}.{versie?.Build}";
+
             BarcodeTextBox.Focus();
             _ = LaadOnderdelenAsync();
         }

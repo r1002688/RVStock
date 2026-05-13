@@ -41,13 +41,25 @@ jobs:
         run: dotnet tool install -g vpk
 
       - name: Maak Velopack installer
+        shell: pwsh
         run: |
+          # Download vorige release zodat Velopack delta updates kan maken
+          $prevRelease = gh release list --repo r1002688/RVStock --limit 1 --json tagName | ConvertFrom-Json
+          if ($prevRelease.Count -gt 0) {
+            $prevTag = $prevRelease[0].tagName
+            Write-Host "Vorige versie: $prevTag"
+            New-Item -ItemType Directory -Force -Path PrevReleases | Out-Null
+            gh release download $prevTag --repo r1002688/RVStock --dir PrevReleases 2>$null || true
+          }
+
           vpk pack `
             --packId RVStock `
             --packVersion ${{ steps.version.outputs.VERSION }} `
             --packDir publish/ `
             --mainExe RVStock.exe `
             --outputDir Releases/
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Maak GitHub Release aan
         uses: softprops/action-gh-release@v2
