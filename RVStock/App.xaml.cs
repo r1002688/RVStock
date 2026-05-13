@@ -21,7 +21,7 @@ namespace RVStock
             try
             {
                 // GitHub Releases update URL - past automatisch aan bij nieuwe releases
-                var updateUrl = "https://github.com/erik/RVStock/releases/latest/download";
+                var updateUrl = "https://github.com/r1002688/RVStock/releases/latest/download";
                 var mgr = new Velopack.UpdateManager(updateUrl);
 
                 if (!mgr.IsInstalled) return;

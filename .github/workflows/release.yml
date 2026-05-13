@@ -3,6 +3,7 @@ name: Build & Release RVStock
 on:
   push:
     branches:
+      - master
       - main
 
 jobs:
