@@ -1,5 +1,4 @@
 ﻿using RVStock.Services;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Input;
 
@@ -7,8 +6,6 @@ namespace RVStock
 {
     public partial class MainWindow : Window
     {
-        private readonly ApiClient _api = new();
-
         public MainWindow()
         {
             InitializeComponent();
@@ -25,28 +22,15 @@ namespace RVStock
                 {
                     try
                     {
-                        var response = await _api.ScanAsync(barcode);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            ScanStatusText.Foreground = System.Windows.Media.Brushes.Green;
-                            ScanStatusText.Text = $"✔  '{barcode}' uitgescand";
-                            await LaadOnderdelenAsync();
-                        }
-                        else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                        {
-                            ScanStatusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
-                            ScanStatusText.Text = $"⚠  Barcode '{barcode}' niet gevonden";
-                        }
-                        else
-                        {
-                            ScanStatusText.Foreground = System.Windows.Media.Brushes.Red;
-                            ScanStatusText.Text = "✖  Fout bij scannen";
-                        }
+                        await StockService.ScanAsync(barcode);
+                        ScanStatusText.Foreground = System.Windows.Media.Brushes.Green;
+                        ScanStatusText.Text = $"✔  '{barcode}' uitgescand";
+                        await LaadOnderdelenAsync();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        ScanStatusText.Foreground = System.Windows.Media.Brushes.Red;
-                        ScanStatusText.Text = "✖  Geen verbinding met API";
+                        ScanStatusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
+                        ScanStatusText.Text = $"⚠  {ex.Message}";
                     }
 
                     BarcodeTextBox.Clear();
@@ -65,16 +49,9 @@ namespace RVStock
 
         private async Task LaadOnderdelenAsync()
         {
-            try
-            {
-                var onderdelen = await _api.GetOnderdelenAsync();
-                ProductsGrid.ItemsSource = onderdelen;
-                AantalItemsText.Text = $"{onderdelen?.Count ?? 0} onderdelen";
-            }
-            catch
-            {
-                // API niet bereikbaar
-            }
+            var onderdelen = await StockService.GetOnderdelenAsync();
+            ProductsGrid.ItemsSource = onderdelen;
+            AantalItemsText.Text = $"{onderdelen.Count} onderdelen";
         }
     }
 }

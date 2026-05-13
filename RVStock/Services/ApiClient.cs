@@ -1,49 +1,95 @@
-using System.Net.Http;
-using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore;
+using RVStock.Data;
 using RVStockSHARED.Models;
 
 namespace RVStock.Services
 {
-    public class ApiClient
+    public class StockService
     {
-        private readonly HttpClient _http;
+        private static StockContext CreateContext() => new StockContext();
 
-        public ApiClient()
+        // ── Onderdelen ────────────────────────────────────────────────
+        public static async Task<List<Onderdeel>> GetOnderdelenAsync()
         {
-            _http = new HttpClient { BaseAddress = new Uri("http://localhost:5027/") };
+            using var db = CreateContext();
+            return await db.Onderdelen.Include(o => o.Leverancier).ToListAsync();
         }
 
-        // Onderdelen
-        public Task<List<Onderdeel>?> GetOnderdelenAsync() =>
-            _http.GetFromJsonAsync<List<Onderdeel>>("api/onderdelen");
+        public static async Task<Onderdeel?> GetOnderdeelByBarcodeAsync(string barcode)
+        {
+            using var db = CreateContext();
+            return await db.Onderdelen.Include(o => o.Leverancier)
+                .FirstOrDefaultAsync(o => o.Barcode == barcode);
+        }
 
-        public Task<HttpResponseMessage> ScanAsync(string barcode) =>
-            _http.PostAsJsonAsync("api/onderdelen/scan", barcode);
+        public static async Task ScanAsync(string barcode)
+        {
+            using var db = CreateContext();
+            var onderdeel = await db.Onderdelen.FirstOrDefaultAsync(o => o.Barcode == barcode)
+                ?? throw new Exception($"Geen onderdeel gevonden met barcode '{barcode}'.");
 
-        public Task<HttpResponseMessage> CreateOnderdeelAsync(Onderdeel o) =>
-            _http.PostAsJsonAsync("api/onderdelen", o);
+            onderdeel.Voorraad = Math.Max(0, onderdeel.Voorraad - 1);
 
-        public Task<HttpResponseMessage> UpdateOnderdeelAsync(Onderdeel o) =>
-            _http.PutAsJsonAsync($"api/onderdelen/{o.Id}", o);
+            var bestellijn = await db.Bestelijnen
+                .FirstOrDefaultAsync(b => b.OnderdeelId == onderdeel.Id && b.Status == "Open");
 
-        public Task<HttpResponseMessage> DeleteOnderdeelAsync(int id) =>
-            _http.DeleteAsync($"api/onderdelen/{id}");
+            if (bestellijn == null)
+                db.Bestelijnen.Add(new Bestellijn { OnderdeelId = onderdeel.Id, Aantal = 1, Status = "Open" });
+            else
+                bestellijn.Aantal++;
 
-        // Leveranciers
-        public Task<List<Leverancier>?> GetLeveranciersAsync() =>
-            _http.GetFromJsonAsync<List<Leverancier>>("api/leveranciers");
+            await db.SaveChangesAsync();
+        }
 
-        public Task<HttpResponseMessage> CreateLeverancierAsync(Leverancier l) =>
-            _http.PostAsJsonAsync("api/leveranciers", l);
+        public static async Task SaveOnderdeelAsync(Onderdeel onderdeel)
+        {
+            using var db = CreateContext();
+            if (onderdeel.Id == 0)
+                db.Onderdelen.Add(onderdeel);
+            else
+                db.Onderdelen.Update(onderdeel);
+            await db.SaveChangesAsync();
+        }
 
-        public Task<HttpResponseMessage> UpdateLeverancierAsync(Leverancier l) =>
-            _http.PutAsJsonAsync($"api/leveranciers/{l.Id}", l);
+        public static async Task DeleteOnderdeelAsync(int id)
+        {
+            using var db = CreateContext();
+            var o = await db.Onderdelen.FindAsync(id);
+            if (o != null) { db.Onderdelen.Remove(o); await db.SaveChangesAsync(); }
+        }
 
-        public Task<HttpResponseMessage> DeleteLeverancierAsync(int id) =>
-            _http.DeleteAsync($"api/leveranciers/{id}");
+        // ── Leveranciers ─────────────────────────────────────────────
+        public static async Task<List<Leverancier>> GetLeveranciersAsync()
+        {
+            using var db = CreateContext();
+            return await db.Leveranciers.ToListAsync();
+        }
 
-        // Bestelijnen
-        public Task<List<Bestellijn>?> GetOpenBestelijnenAsync() =>
-            _http.GetFromJsonAsync<List<Bestellijn>>("api/bestelijnen/open");
+        public static async Task SaveLeverancierAsync(Leverancier leverancier)
+        {
+            using var db = CreateContext();
+            if (leverancier.Id == 0)
+                db.Leveranciers.Add(leverancier);
+            else
+                db.Leveranciers.Update(leverancier);
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task DeleteLeverancierAsync(int id)
+        {
+            using var db = CreateContext();
+            var l = await db.Leveranciers.FindAsync(id);
+            if (l != null) { db.Leveranciers.Remove(l); await db.SaveChangesAsync(); }
+        }
+
+        // ── Bestelijnen ───────────────────────────────────────────────
+        public static async Task<List<Bestellijn>> GetOpenBestelijnenAsync()
+        {
+            using var db = CreateContext();
+            return await db.Bestelijnen
+                .Where(b => b.Status == "Open")
+                .Include(b => b.Onderdeel).ThenInclude(o => o!.Leverancier)
+                .ToListAsync();
+        }
     }
 }

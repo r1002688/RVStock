@@ -1,4 +1,5 @@
-﻿using System.Windows;
+using RVStock.Data;
+using System.Windows;
 using Velopack;
 
 namespace RVStock
@@ -10,18 +11,21 @@ namespace RVStock
             VelopackApp.Build()
                 .WithFirstRun(v =>
                 {
-                    // Maak desktop en startmenu snelkoppeling aan bij eerste installatie
                     var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
-
                     CreateShortcut(
                         System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "RVStock.lnk"),
                         exePath, "RVStock Stockbeheer");
-
                     CreateShortcut(
                         System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "RVStock.lnk"),
                         exePath, "RVStock Stockbeheer");
                 })
                 .Run();
+
+            // Database aanmaken bij eerste opstart
+            using (var db = new StockContext())
+            {
+                db.Database.EnsureCreated();
+            }
 
             base.OnStartup(e);
             _ = CheckForUpdatesAsync();
@@ -31,7 +35,6 @@ namespace RVStock
         {
             try
             {
-                // Gebruik Windows Script Host via COM om een .lnk bestand aan te maken
                 Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
                 if (shellType == null) return;
                 dynamic shell = Activator.CreateInstance(shellType)!;
@@ -41,20 +44,15 @@ namespace RVStock
                 shortcut.WorkingDirectory = System.IO.Path.GetDirectoryName(targetPath);
                 shortcut.Save();
             }
-            catch
-            {
-                // Snelkoppeling aanmaken mislukt, niet kritiek
-            }
+            catch { }
         }
 
         private async Task CheckForUpdatesAsync()
         {
             try
             {
-               
                 var updateUrl = "https://github.com/r1002688/RVStock/releases/latest/download";
                 var mgr = new Velopack.UpdateManager(updateUrl);
-
                 if (!mgr.IsInstalled) return;
 
                 var update = await mgr.CheckForUpdatesAsync();
@@ -72,10 +70,7 @@ namespace RVStock
                     mgr.ApplyUpdatesAndRestart(update);
                 }
             }
-            catch
-            {
-                // Update server niet bereikbaar, gewoon verder
-            }
+            catch { }
         }
     }
 }
