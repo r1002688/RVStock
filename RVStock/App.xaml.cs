@@ -21,10 +21,10 @@ namespace RVStock
                 })
                 .Run();
 
-            // Database aanmaken bij eerste opstart
+            // Database aanmaken bij eerste opstart + schema updaten bij elke opstart
             using (var db = new StockContext())
             {
-                db.Database.EnsureCreated();
+                db.InitialiseerDatabase();
             }
 
             base.OnStartup(e);

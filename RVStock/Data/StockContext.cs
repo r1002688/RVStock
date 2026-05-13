@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using RVStockSHARED.Models;
 using System.IO;
 
@@ -12,13 +14,10 @@ namespace RVStock.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            // Sla de database op in AppData\Local\RVStock zodat het werkt na installatie
             var folder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "RVStock");
-
             Directory.CreateDirectory(folder);
-
             var dbPath = Path.Combine(folder, "stock.db");
             options.UseSqlite($"Data Source={dbPath}");
         }
@@ -34,6 +33,35 @@ namespace RVStock.Data
                 .HasOne(b => b.Onderdeel)
                 .WithMany()
                 .HasForeignKey(b => b.OnderdeelId);
+        }
+
+        /// <summary>
+        /// Maakt de database aan als die niet bestaat én voegt automatisch
+        /// ontbrekende kolommen toe bij een update. Zo crasht de app nooit
+        /// na een update waarbij nieuwe velden worden toegevoegd.
+        /// </summary>
+        public void InitialiseerDatabase()
+        {
+            // Maak tabellen aan als de database nog niet bestaat
+            Database.EnsureCreated();
+
+            // Voeg ontbrekende kolommen toe (veilig, gooit geen fout als kolom al bestaat)
+            var kolommen = new[]
+            {
+                ("Onderdelen", "Bestelnummer", "TEXT NOT NULL DEFAULT ''"),
+            };
+
+            foreach (var (tabel, kolom, type) in kolommen)
+            {
+                try
+                {
+                    Database.ExecuteSqlRaw($"ALTER TABLE {tabel} ADD COLUMN {kolom} {type}");
+                }
+                catch
+                {
+                    // Kolom bestaat al, geen probleem
+                }
+            }
         }
     }
 }
