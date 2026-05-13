@@ -10,7 +10,7 @@ namespace RVStock.Services
 
         public ApiClient()
         {
-            _http = new HttpClient { BaseAddress = new Uri("http://localhost:5000/") };
+            _http = new HttpClient { BaseAddress = new Uri("http://localhost:5027/") };
         }
 
         // Onderdelen

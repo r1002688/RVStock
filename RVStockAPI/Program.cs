@@ -21,7 +21,19 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<StockContext>();
+
+    // Maak DB aan als die nog niet bestaat
     db.Database.EnsureCreated();
+
+    // Voeg Bestelnummer kolom toe als die nog ontbreekt (schema update)
+    try
+    {
+        db.Database.ExecuteSqlRaw("ALTER TABLE Onderdelen ADD COLUMN Bestelnummer TEXT NOT NULL DEFAULT ''");
+    }
+    catch
+    {
+        // Kolom bestaat al, geen probleem
+    }
 }
 
 // Configure the HTTP request pipeline.
