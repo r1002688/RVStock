@@ -51,16 +51,40 @@
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="8" ShadowDepth="1" Opacity="0.1"/>
                 </Border.Effect>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="🔍  Scan barcode:" FontSize="14" FontWeight="SemiBold"
-                               VerticalAlignment="Center" Margin="0 0 12 0"/>
-                    <TextBox x:Name="BarcodeTextBox" Width="280" Height="36" FontSize="14"
-                             Padding="10 6" VerticalContentAlignment="Center"
-                             BorderBrush="#BBDEFB" BorderThickness="2"
-                             KeyDown="BarcodeTextBox_KeyDown"/>
-                    <TextBlock x:Name="ScanStatusText" FontSize="13" VerticalAlignment="Center"
-                               Margin="14 0 0 0" Foreground="#4CAF50"/>
-                </StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <!-- Rij 1: categorie filter -->
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+                        <TextBlock Text="📁  Categorie:" FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0 0 10 0" Foreground="#546E7A"/>
+                        <ComboBox x:Name="CategorieFilterBox" Width="200" Height="32" FontSize="13"
+                                  DisplayMemberPath="Naam" SelectedValuePath="Id"
+                                  SelectionChanged="CategorieFilterBox_SelectionChanged"/>
+                    </StackPanel>
+                    <!-- Rij 2: scan -->
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <TextBlock Text="🔍  Scan barcode:" FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0 0 12 0"/>
+                        <TextBox x:Name="BarcodeTextBox" Width="280" Height="36" FontSize="14"
+                                 Padding="10 6" VerticalContentAlignment="Center"
+                                 BorderBrush="#BBDEFB" BorderThickness="2"
+                                 KeyDown="BarcodeTextBox_KeyDown"/>
+                        <TextBlock Text="Aantal:" FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="16 0 8 0" Foreground="#546E7A"/>
+                        <TextBox x:Name="AantalScanBox" Width="60" Height="36" FontSize="14"
+                                 Padding="10 6" VerticalContentAlignment="Center"
+                                 BorderBrush="#BBDEFB" BorderThickness="2" Text="1"/>
+                        <Button Content="➖  Uitscannen" Height="36" Padding="14 0" Margin="10 0 0 0"
+                                Background="#E53935" Foreground="White" FontWeight="Bold"
+                                BorderThickness="0" Cursor="Hand"
+                                Click="UitscanButton_Click"/>
+                        <TextBlock x:Name="ScanStatusText" FontSize="13" VerticalAlignment="Center"
+                                   Margin="14 0 0 0" Foreground="#4CAF50"/>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Tabel -->
@@ -123,6 +147,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Bestelnummer" Binding="{Binding Bestelnummer}" Width="140"/>
                             <DataGridTextColumn Header="Benaming" Binding="{Binding Naam}" Width="*"/>
+                            <DataGridTextColumn Header="Categorie" Binding="{Binding Categorie.Naam}" Width="120"/>
                             <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="160"/>
                             <DataGridTextColumn Header="Leverancier" Binding="{Binding Leverancier.Naam}" Width="160"/>
                             <DataGridTemplateColumn Header="Voorraad" Width="110">

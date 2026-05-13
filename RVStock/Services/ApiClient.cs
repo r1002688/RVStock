@@ -9,34 +9,35 @@ namespace RVStock.Services
         private static StockContext CreateContext() => new StockContext();
 
         // ── Onderdelen ────────────────────────────────────────────────
-        public static async Task<List<Onderdeel>> GetOnderdelenAsync()
+        public static async Task<List<Onderdeel>> GetOnderdelenAsync(int? categorieId = null)
         {
             using var db = CreateContext();
-            return await db.Onderdelen.Include(o => o.Leverancier).ToListAsync();
+            var query = db.Onderdelen
+                .Include(o => o.Leverancier)
+                .Include(o => o.Categorie)
+                .AsQueryable();
+
+            if (categorieId.HasValue)
+                query = query.Where(o => o.CategorieId == categorieId);
+
+            return await query.OrderBy(o => o.Naam).ToListAsync();
         }
 
-        public static async Task<Onderdeel?> GetOnderdeelByBarcodeAsync(string barcode)
-        {
-            using var db = CreateContext();
-            return await db.Onderdelen.Include(o => o.Leverancier)
-                .FirstOrDefaultAsync(o => o.Barcode == barcode);
-        }
-
-        public static async Task ScanAsync(string barcode)
+        public static async Task ScanAsync(string barcode, int aantalUitscannen = 1)
         {
             using var db = CreateContext();
             var onderdeel = await db.Onderdelen.FirstOrDefaultAsync(o => o.Barcode == barcode)
                 ?? throw new Exception($"Geen onderdeel gevonden met barcode '{barcode}'.");
 
-            onderdeel.Voorraad = Math.Max(0, onderdeel.Voorraad - 1);
+            onderdeel.Voorraad = Math.Max(0, onderdeel.Voorraad - aantalUitscannen);
 
             var bestellijn = await db.Bestelijnen
                 .FirstOrDefaultAsync(b => b.OnderdeelId == onderdeel.Id && b.Status == "Open");
 
             if (bestellijn == null)
-                db.Bestelijnen.Add(new Bestellijn { OnderdeelId = onderdeel.Id, Aantal = 1, Status = "Open" });
+                db.Bestelijnen.Add(new Bestellijn { OnderdeelId = onderdeel.Id, Aantal = aantalUitscannen, Status = "Open" });
             else
-                bestellijn.Aantal++;
+                bestellijn.Aantal += aantalUitscannen;
 
             await db.SaveChangesAsync();
         }
@@ -62,7 +63,7 @@ namespace RVStock.Services
         public static async Task<List<Leverancier>> GetLeveranciersAsync()
         {
             using var db = CreateContext();
-            return await db.Leveranciers.ToListAsync();
+            return await db.Leveranciers.OrderBy(l => l.Naam).ToListAsync();
         }
 
         public static async Task SaveLeverancierAsync(Leverancier leverancier)
@@ -80,6 +81,30 @@ namespace RVStock.Services
             using var db = CreateContext();
             var l = await db.Leveranciers.FindAsync(id);
             if (l != null) { db.Leveranciers.Remove(l); await db.SaveChangesAsync(); }
+        }
+
+        // ── Categorieën ───────────────────────────────────────────────
+        public static async Task<List<Categorie>> GetCategorieënAsync()
+        {
+            using var db = CreateContext();
+            return await db.Categorieën.OrderBy(c => c.Naam).ToListAsync();
+        }
+
+        public static async Task SaveCategorieAsync(Categorie categorie)
+        {
+            using var db = CreateContext();
+            if (categorie.Id == 0)
+                db.Categorieën.Add(categorie);
+            else
+                db.Categorieën.Update(categorie);
+            await db.SaveChangesAsync();
+        }
+
+        public static async Task DeleteCategorieAsync(int id)
+        {
+            using var db = CreateContext();
+            var c = await db.Categorieën.FindAsync(id);
+            if (c != null) { db.Categorieën.Remove(c); await db.SaveChangesAsync(); }
         }
 
         // ── Bestelijnen ───────────────────────────────────────────────

@@ -9,6 +9,7 @@ namespace RVStock.Data
     public class StockContext : DbContext
     {
         public DbSet<Leverancier> Leveranciers { get; set; }
+        public DbSet<Categorie> Categorieën { get; set; }
         public DbSet<Onderdeel> Onderdelen { get; set; }
         public DbSet<Bestellijn> Bestelijnen { get; set; }
 
@@ -29,10 +30,22 @@ namespace RVStock.Data
                 .WithMany()
                 .HasForeignKey(o => o.LeverancierId);
 
+            modelBuilder.Entity<Onderdeel>()
+                .HasOne(o => o.Categorie)
+                .WithMany()
+                .HasForeignKey(o => o.CategorieId)
+                .IsRequired(false);
+
             modelBuilder.Entity<Bestellijn>()
                 .HasOne(b => b.Onderdeel)
                 .WithMany()
                 .HasForeignKey(b => b.OnderdeelId);
+
+            // Standaard categorieën
+            modelBuilder.Entity<Categorie>().HasData(
+                new Categorie { Id = 1, Naam = "Beslag" },
+                new Categorie { Id = 2, Naam = "Rubber" }
+            );
         }
 
         /// <summary>
@@ -42,26 +55,31 @@ namespace RVStock.Data
         /// </summary>
         public void InitialiseerDatabase()
         {
-            // Maak tabellen aan als de database nog niet bestaat
             Database.EnsureCreated();
 
-            // Voeg ontbrekende kolommen toe (veilig, gooit geen fout als kolom al bestaat)
             var kolommen = new[]
             {
-                ("Onderdelen", "Bestelnummer", "TEXT NOT NULL DEFAULT ''"),
+                ("Onderdelen", "Bestelnummer",  "TEXT NOT NULL DEFAULT ''"),
+                ("Onderdelen", "CategorieId",   "INTEGER NULL"),
             };
 
             foreach (var (tabel, kolom, type) in kolommen)
             {
-                try
-                {
-                    Database.ExecuteSqlRaw($"ALTER TABLE {tabel} ADD COLUMN {kolom} {type}");
-                }
-                catch
-                {
-                    // Kolom bestaat al, geen probleem
-                }
+                try { Database.ExecuteSqlRaw($"ALTER TABLE {tabel} ADD COLUMN {kolom} {type}"); }
+                catch { }
             }
+
+            // Maak Categorieën tabel aan als die nog niet bestaat
+            try
+            {
+                Database.ExecuteSqlRaw(
+                    "CREATE TABLE IF NOT EXISTS \"Categorieën\" (\"Id\" INTEGER NOT NULL CONSTRAINT \"PK_Categorieën\" PRIMARY KEY AUTOINCREMENT, \"Naam\" TEXT NOT NULL)");
+
+                // Standaard categorieën toevoegen als ze nog niet bestaan
+                Database.ExecuteSqlRaw("INSERT OR IGNORE INTO \"Categorieën\" (Id, Naam) VALUES (1, 'Beslag')");
+                Database.ExecuteSqlRaw("INSERT OR IGNORE INTO \"Categorieën\" (Id, Naam) VALUES (2, 'Rubber')");
+            }
+            catch { }
         }
     }
 }

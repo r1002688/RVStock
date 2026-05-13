@@ -17,5 +17,8 @@ namespace RVStockSHARED.Models
 
         public int LeverancierId { get; set; }
         public Leverancier? Leverancier { get; set; }
+
+        public int? CategorieId { get; set; }
+        public Categorie? Categorie { get; set; }
     }
 }
