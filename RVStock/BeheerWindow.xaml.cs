@@ -40,7 +40,7 @@ namespace RVStock
                 LevNaamBox.Text = l.Naam;
                 LevEmailBox.Text = l.Email;
                 foreach (ComboBoxItem item in LevBesteldagBox.Items)
-                    if ((int)item.Tag == (int)l.BestelDag)
+                    if (int.Parse(item.Tag.ToString()!) == (int)l.BestelDag)
                     { LevBesteldagBox.SelectedItem = item; break; }
             }
         }
@@ -48,7 +48,8 @@ namespace RVStock
         private async void SaveLeverancier_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(LevNaamBox.Text) || LevBesteldagBox.SelectedItem == null) return;
-            var dag = (DayOfWeek)(int)((ComboBoxItem)LevBesteldagBox.SelectedItem).Tag;
+            var tagWaarde = int.Parse(((ComboBoxItem)LevBesteldagBox.SelectedItem).Tag.ToString()!);
+            var dag = (DayOfWeek)tagWaarde;
             var leverancier = new Leverancier
             {
                 Id = _geselecteerdeLeverancierId ?? 0,
