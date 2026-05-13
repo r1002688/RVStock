@@ -1,0 +1,165 @@
+<Window x:Class="RVStock.BeheerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RVStock - Beheer"
+        Height="650" Width="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="1">
+
+            <!-- ===== LEVERANCIERS TAB ===== -->
+            <TabItem Header="Leveranciers">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="280"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Lijst -->
+                    <DockPanel Grid.Column="0" Margin="0 0 15 0">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 8">
+                            <TextBlock Text="Leveranciers" FontSize="18" FontWeight="Bold"/>
+                            <Button Content="Vernieuwen" Width="90" Height="28" Margin="15 0 0 0"
+                                    Click="RefreshLeveranciers_Click"/>
+                        </StackPanel>
+                        <DataGrid x:Name="LeveranciersGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionChanged="LeveranciersGrid_SelectionChanged"
+                                  AlternatingRowBackground="#F5F5F5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                                <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="*"/>
+                                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="200"/>
+                                <DataGridTextColumn Header="Besteldag" Binding="{Binding BestelDag}" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <!-- Formulier -->
+                    <Border Grid.Column="1" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6" Padding="15">
+                        <StackPanel>
+                            <TextBlock Text="Leverancier" FontSize="16" FontWeight="Bold" Margin="0 0 0 12"/>
+
+                            <TextBlock Text="Naam"/>
+                            <TextBox x:Name="LevNaamBox" Margin="0 2 0 10" Height="28" Padding="4"/>
+
+                            <TextBlock Text="Email"/>
+                            <TextBox x:Name="LevEmailBox" Margin="0 2 0 10" Height="28" Padding="4"/>
+
+                            <TextBlock Text="Besteldag"/>
+                            <ComboBox x:Name="LevBesteldagBox" Margin="0 2 0 15" Height="28">
+                                <ComboBoxItem Content="Maandag" Tag="1"/>
+                                <ComboBoxItem Content="Dinsdag" Tag="2"/>
+                                <ComboBoxItem Content="Woensdag" Tag="3"/>
+                                <ComboBoxItem Content="Donderdag" Tag="4"/>
+                                <ComboBoxItem Content="Vrijdag" Tag="5"/>
+                                <ComboBoxItem Content="Zaterdag" Tag="6"/>
+                                <ComboBoxItem Content="Zondag" Tag="0"/>
+                            </ComboBox>
+
+                            <Button Content="Opslaan" Height="32" Background="#2196F3" Foreground="White"
+                                    FontWeight="Bold" Click="SaveLeverancier_Click" Margin="0 0 0 8"/>
+                            <Button Content="Nieuw" Height="32" Click="NieuweLeverancier_Click" Margin="0 0 0 8"/>
+                            <Button Content="Verwijderen" Height="32" Background="#F44336" Foreground="White"
+                                    Click="DeleteLeverancier_Click"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== ONDERDELEN TAB ===== -->
+            <TabItem Header="Onderdelen">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="280"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Lijst -->
+                    <DockPanel Grid.Column="0" Margin="0 0 15 0">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 8">
+                            <TextBlock Text="Onderdelen" FontSize="18" FontWeight="Bold"/>
+                            <Button Content="Vernieuwen" Width="90" Height="28" Margin="15 0 0 0"
+                                    Click="RefreshOnderdelen_Click"/>
+                        </StackPanel>
+                        <DataGrid x:Name="OnderdelenGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  SelectionChanged="OnderdelenGrid_SelectionChanged"
+                                  AlternatingRowBackground="#F5F5F5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                                <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="*"/>
+                                <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="150"/>
+                                <DataGridTextColumn Header="Voorraad" Binding="{Binding Voorraad}" Width="80"/>
+                                <DataGridTextColumn Header="Leverancier" Binding="{Binding Leverancier.Naam}" Width="150"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <!-- Formulier -->
+                    <Border Grid.Column="1" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6" Padding="15">
+                        <StackPanel>
+                            <TextBlock Text="Onderdeel" FontSize="16" FontWeight="Bold" Margin="0 0 0 12"/>
+
+                            <TextBlock Text="Naam"/>
+                            <TextBox x:Name="OndNaamBox" Margin="0 2 0 10" Height="28" Padding="4"/>
+
+                            <TextBlock Text="Barcode"/>
+                            <TextBox x:Name="OndBarcodeBox" Margin="0 2 0 10" Height="28" Padding="4"/>
+
+                            <TextBlock Text="Voorraad"/>
+                            <TextBox x:Name="OndVoorraadBox" Margin="0 2 0 10" Height="28" Padding="4"/>
+
+                            <TextBlock Text="Leverancier"/>
+                            <ComboBox x:Name="OndLeverancierBox" Margin="0 2 0 15" Height="28"
+                                      DisplayMemberPath="Naam" SelectedValuePath="Id"/>
+
+                            <Button Content="Opslaan" Height="32" Background="#2196F3" Foreground="White"
+                                    FontWeight="Bold" Click="SaveOnderdeel_Click" Margin="0 0 0 8"/>
+                            <Button Content="Nieuw" Height="32" Click="NieuwOnderdeel_Click" Margin="0 0 0 8"/>
+                            <Button Content="Verwijderen" Height="32" Background="#F44336" Foreground="White"
+                                    Click="DeleteOnderdeel_Click"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- ===== BESTELLIJST TAB ===== -->
+            <TabItem Header="Open Bestellijst">
+                <Grid Margin="10">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 8">
+                            <TextBlock Text="Open bestellijnen" FontSize="18" FontWeight="Bold"/>
+                            <Button Content="Vernieuwen" Width="90" Height="28" Margin="15 0 0 0"
+                                    Click="RefreshBestelijnen_Click"/>
+                        </StackPanel>
+                        <DataGrid x:Name="BestelijnenGrid"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  AlternatingRowBackground="#F5F5F5">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Onderdeel" Binding="{Binding Onderdeel.Naam}" Width="*"/>
+                                <DataGridTextColumn Header="Barcode" Binding="{Binding Onderdeel.Barcode}" Width="150"/>
+                                <DataGridTextColumn Header="Leverancier" Binding="{Binding Onderdeel.Leverancier.Naam}" Width="180"/>
+                                <DataGridTextColumn Header="Aantal" Binding="{Binding Aantal}" Width="80"/>
+                                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>
