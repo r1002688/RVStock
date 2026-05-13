@@ -51,13 +51,10 @@ namespace RVStock
         {
             try
             {
-                // Velopack verwacht een URL naar een map die RELEASES, setup.exe en delta pakketten bevat
-                // GitHub Releases stelt bestanden beschikbaar via de tag download URL
-                var updateUrl = "https://github.com/r1002688/RVStock/releases/download/v" +
-                    System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3);
+                // GithubSource is de correcte manier voor Velopack + GitHub Releases
+                var mgr = new Velopack.UpdateManager(
+                    new Velopack.Sources.GithubSource("https://github.com/r1002688/RVStock", null, false));
 
-                // Gebruik de algemene releases URL zodat Velopack de nieuwste versie kan vinden
-                var mgr = new Velopack.UpdateManager("https://github.com/r1002688/RVStock/releases/latest/download");
                 if (!mgr.IsInstalled) return;
 
                 var update = await mgr.CheckForUpdatesAsync();
