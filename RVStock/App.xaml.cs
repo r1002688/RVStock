@@ -7,12 +7,44 @@ namespace RVStock
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            VelopackApp.Build().Run();
+            VelopackApp.Build()
+                .WithFirstRun(v =>
+                {
+                    // Maak desktop en startmenu snelkoppeling aan bij eerste installatie
+                    var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName;
+
+                    CreateShortcut(
+                        System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "RVStock.lnk"),
+                        exePath, "RVStock Stockbeheer");
+
+                    CreateShortcut(
+                        System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "RVStock.lnk"),
+                        exePath, "RVStock Stockbeheer");
+                })
+                .Run();
 
             base.OnStartup(e);
-
-            
             _ = CheckForUpdatesAsync();
+        }
+
+        private static void CreateShortcut(string shortcutPath, string targetPath, string description)
+        {
+            try
+            {
+                // Gebruik Windows Script Host via COM om een .lnk bestand aan te maken
+                Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
+                if (shellType == null) return;
+                dynamic shell = Activator.CreateInstance(shellType)!;
+                var shortcut = shell.CreateShortcut(shortcutPath);
+                shortcut.TargetPath = targetPath;
+                shortcut.Description = description;
+                shortcut.WorkingDirectory = System.IO.Path.GetDirectoryName(targetPath);
+                shortcut.Save();
+            }
+            catch
+            {
+                // Snelkoppeling aanmaken mislukt, niet kritiek
+            }
         }
 
         private async Task CheckForUpdatesAsync()
